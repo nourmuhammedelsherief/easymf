@@ -1,0 +1,37 @@
+
+.gray-background {
+
+    background: #0c0c0c;
+}
+
+.table_img {
+
+    max-height: 70px;
+    max-width: 70px;
+}
+
+.label-dark {
+
+    color: #FFF;
+    background-color: #0c0c0c;
+    border-color: #2f353b;
+}
+
+.no_dec a:hover {
+
+    text-decoration: none;
+}
+
+#owl-carousel .item {
+    display: block;
+    width: 100%;
+    height: 500px;
+    background-position: center center;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    overflow: HIDDEN;
+    direction: rtl;
+}
+

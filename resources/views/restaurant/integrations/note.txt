@@ -1,0 +1,241 @@
+   <div class="row">
+                            <div class="col-md-3">
+                                @php
+                                    $state = generateApiToken($restaurant->id, 10);
+                                    $restaurant->update([
+                                        'foodics_state' => $state,
+                                    ]);
+                                    $foodics_url = 'https://console.foodics.com/authorize?client_id=94a7eeac-5881-4b19-ae6a-024debd9ac05&state=' . $state;
+
+                                    $myFoodicsService = \App\Models\ServiceSubscription::whereRestaurantId($restaurant->id)
+                                        ->where('status' , 'active')
+                                        ->where('service_id' , 4)
+                                        ->first();
+                                @endphp
+                                @if($myFoodicsService and $restaurant->foodics_access_token == null and $restaurant->foodics_status == 'true')
+                                    <img src="{{asset('/uploads/services/' . $myFoodicsService->service->photo)}}"
+                                         width="200" height="100">                                    <br>
+                                    <br>
+                                    <a class="btn btn-primary" href="{{$foodics_url}}">
+                                        {{app()->getLocale() == 'ar' ? 'التكامل مع فوودكس' : 'Foodics Integration'}}
+                                    </a>
+                                @elseif($myFoodicsService and $restaurant->foodics_access_token != null && $restaurant->foodics_status == 'true')
+                                    <img src="{{asset('/uploads/services/' . $myFoodicsService->service->photo)}}"
+                                         width="200" height="100">
+                                    <br>
+                                    <br>
+                                    <a class="btn btn-success" href="{{route('pull_menu' , $restaurant->id)}}">
+                                        سحب المنيو
+                                    </a>
+                                    <a class="btn btn-danger delete_data"  data="{{ $restaurant->id }}"
+                                       data_name="{{$myFoodicsService->service->name}}">
+                                        {{app()->getLocale() == 'ar' ? 'الغاء الربط':'remove integration' }}
+                                    </a>
+
+                                    @if($myFoodicsService)
+                                        <a target="_blank" class="btn btn-secondary"
+                                           href="{{route('print_service_invoice' , $myFoodicsService->id)}}">
+                                            عرض الفاتورة
+                                        </a>
+                                    @endif
+                                    <br>
+                                    @lang('messages.branch') : {{app()->getLocale() == 'ar' ? $myFoodicsService->branch->name_ar : $easymenuCasher->branch->name_en}}
+                                    <br>
+
+                                @endif
+                                @if($myFoodicsService and $myFoodicsService->end_at <= now()->addDays(30))
+                                    <?php
+                                    $ticketTime = strtotime($myFoodicsService->end_at);
+
+                                    // This difference is in seconds.
+                                    $difference = $ticketTime - time();
+                                    ?>
+                                    <br>
+                                    {{app()->getLocale() == 'ar' ? 'متبقي' . round($difference / 86400) . 'يوم': 'stay' .round($difference / 86400). 'day' }}
+                                    <br>
+                                    <a href="{{route('restaurant.services_store.subscription' , 4)}}"
+                                       style="margin-top: 20px;" class="btn btn-primary">
+                                        <i class="fa fa-user-edit"></i>
+                                        {{$myFoodicsService->status == 'tentative' ? trans('messages.activate_subscription') : trans('messages.renewSubscription')}}
+                                    </a>
+                                @endif
+                            </div>
+
+                            <div class="col-md-3">
+                                @php
+                                    $myLoyaltyPointService = \App\Models\ServiceSubscription::whereRestaurantId($restaurant->id)
+                                    ->where('status' , 'active')
+                                    ->where('service_id' , 11)
+                                    ->first();
+                                @endphp
+                                @if(isset($myLoyaltyPointService->id))
+                                    <img src="{{asset('/uploads/services/' . $myLoyaltyPointService->service->photo)}}"
+                                         width="200" height="100">
+                                    <br>
+                                    <br>
+                                    <a class="btn btn-primary"
+                                       href="{{route('restaurant.loyalty_point.setting')}}">
+                                        {{app()->getLocale() == 'ar' ? 'الأعدادات' : 'Settings'}}
+                                    </a>
+                                    <a target="_blank" class="btn btn-secondary"
+                                       href="{{route('print_service_invoice' , $myLoyaltyPointService->id)}}">
+                                        عرض الفاتورة 
+                                    </a>
+                                    @if(isset($$myLoyaltyPointService->branch->id))
+                                        <br>
+                                        @lang('messages.branch') : {{app()->getLocale() == 'ar' ? $myLoyaltyPointService->branch->name_ar : $easymenuCasher->branch->name_en}}
+                                    @endif
+                                    <br>
+                                    @if($myLoyaltyPointService and $myLoyaltyPointService->end_at <= now()->addDays(30))
+                                        <?php
+                                        $ticketTime = strtotime($myLoyaltyPointService->end_at);
+
+                                        // This difference is in seconds.
+                                        $difference = $ticketTime - time();
+                                        ?>
+                                        <br>
+                                        {{app()->getLocale() == 'ar' ? 'متبقي' . round($difference / 86400) . 'يوم': 'stay' .round($difference / 86400). 'day' }}
+                                        <br>
+                                        <a href="{{route('restaurant.services_store.subscription' , 1)}}"
+                                           style="margin-top: 20px;" class="btn btn-primary">
+                                            <i class="fa fa-user-edit"></i>
+                                            {{$myLoyaltyPointService->status == 'tentative' ? trans('messages.activate_subscription') : trans('messages.renewSubscription')}}
+
+                                        </a>
+                                    @endif
+                                @endif
+                            </div>
+                            <div class="col-md-3">
+                                @php
+                                    $myReservationService = \App\Models\ServiceSubscription::whereRestaurantId($restaurant->id)
+                                    ->where('status' , 'active')
+                                    ->where('service_id' , 1)
+                                    ->first();
+                                @endphp
+                                @if(isset($myReservationService->id))
+                                    <img src="{{asset('/uploads/services/' . $myReservationService->service->photo)}}"
+                                         width="200" height="100">
+                                    <br>
+                                    <br>
+                                    <a class="btn btn-primary"
+                                       href="{{route('restaurant.reservation.service.setting')}}">
+                                        {{app()->getLocale() == 'ar' ? 'الأعدادات' : 'Settings'}}
+                                    </a>
+                                    <a target="_blank" class="btn btn-secondary"
+                                       href="{{route('print_service_invoice' , $myReservationService->id)}}">
+                                        عرض الفاتورة
+                                    </a>
+                                    @if(isset($$myReservationService->branch->id))
+                                        <br>
+                                        @lang('messages.branch') : {{app()->getLocale() == 'ar' ? $myReservationService->branch->name_ar : $easymenuCasher->branch->name_en}}
+                                    @endif
+                                    <br>
+                                    @if($myReservationService and $myReservationService->end_at <= now()->addDays(30))
+                                        <?php
+                                        $ticketTime = strtotime($myReservationService->end_at);
+
+                                        // This difference is in seconds.
+                                        $difference = $ticketTime - time();
+                                        ?>
+                                        <br>
+                                        {{app()->getLocale() == 'ar' ? 'متبقي' . round($difference / 86400) . 'يوم': 'stay' .round($difference / 86400). 'day' }}
+                                        <br>
+                                        <a href="{{route('restaurant.services_store.subscription' , 1)}}"
+                                           style="margin-top: 20px;" class="btn btn-primary">
+                                            <i class="fa fa-user-edit"></i>
+                                            {{$myReservationService->status == 'tentative' ? trans('messages.activate_subscription') : trans('messages.renewSubscription')}}
+
+                                        </a>
+                                    @endif
+                                @endif
+                            </div>
+                            {{-- start whatsapp order --}}
+                            @php
+                                $whatsappOrders = \App\Models\ServiceSubscription::whereRestaurantId($restaurant->id)
+                                ->where('status' , 'active')
+                                ->where('service_id' , 9)
+                                ->get();
+                            @endphp
+                            @if($whatsappOrders->count() > 0)
+                                @foreach($whatsappOrders as $whatsappOrder)
+                                    <div class="col-sm-3">
+
+                                        <img src="{{asset('/uploads/services/'.$whatsappOrder->service->photo)}}"
+                                             width="200" height="100">
+                                        <br>
+                                        <br>
+                                        <a class="btn btn-primary" href="{{route('restaurant_setting.index')}}">
+                                            {{app()->getLocale() == 'ar' ? 'الأعدادات' : 'Settings'}}
+                                        </a>
+                                        <a target="_blank" class="btn btn-secondary"
+                                           href="{{route('print_service_invoice' , $whatsappOrder->id)}}">
+                                            عرض الفاتورة
+                                        </a>
+                                        <br>
+                                        @lang('messages.branch') : {{app()->getLocale() == 'ar' ? $whatsappOrder->branch->name_ar : $easymenuCasher->branch->name_en}}
+                                        <br>
+                                        @if($whatsappOrder and $whatsappOrder->end_at <= now()->addDays(30))
+                                            <?php
+                                            $ticketTime = strtotime($whatsappOrder->end_at);
+
+                                            // This difference is in seconds.
+                                            $difference = $ticketTime - time();
+                                            ?>
+                                            <br>
+                                            {{app()->getLocale() == 'ar' ? 'متبقي' . round($difference / 86400) . 'يوم': 'stay' .round($difference / 86400). 'day' }}
+                                            <br>
+                                            <a href="{{route('restaurant.services_store.subscription' , 9)}}"
+                                               style="margin-top: 20px;" class="btn btn-primary">
+                                                <i class="fa fa-user-edit"></i>
+                                                {{$whatsappOrder->status == 'tentative' ? trans('messages.activate_subscription') : trans('messages.renewSubscription')}}
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            @endif
+                            @php
+                                $easymenuCashers = \App\Models\ServiceSubscription::whereRestaurantId($restaurant->id)
+                                ->where('status' , 'active')
+                                ->where('service_id' , 10)
+                                ->get();
+                            @endphp
+                            @if($easymenuCashers->count() > 0)
+                                @foreach($easymenuCashers as $easymenuCasher)
+                                    <div class="col-sm-3">
+
+                                        <img src="{{asset('/uploads/services/'.$easymenuCasher->service->photo)}}"
+                                             width="200" height="100">
+                                        <br>
+                                        <br>
+                                        <a class="btn btn-primary" href="{{route('restaurant_setting.index')}}">
+                                            {{app()->getLocale() == 'ar' ? 'الأعدادات' : 'Settings'}}
+                                        </a>
+                                        <a target="_blank" class="btn btn-secondary"
+                                           href="{{route('print_service_invoice' , $easymenuCasher->id)}}">
+                                            عرض الفاتورة
+                                        </a>
+                                        <br>
+                                        @lang('messages.branch') : {{app()->getLocale() == 'ar' ? $easymenuCasher->branch->name_ar : $easymenuCasher->branch->name_en}}
+                                        <br>
+                                        @if($easymenuCasher and $easymenuCasher->end_at <= now()->addDays(30))
+                                            <?php
+                                            $ticketTime = strtotime($easymenuCasher->end_at);
+
+                                            // This difference is in seconds.
+                                            $difference = $ticketTime - time();
+                                            ?>
+                                            <br>
+                                            {{app()->getLocale() == 'ar' ? 'متبقي' . round($difference / 86400) . 'يوم': 'stay' .round($difference / 86400). 'day' }}
+                                            <br>
+                                            <a href="{{route('restaurant.services_store.subscription' , 10)}}"
+                                               style="margin-top: 20px;" class="btn btn-primary">
+                                                <i class="fa fa-user-edit"></i>
+                                                {{$easymenuCasher->status == 'tentative' ? trans('messages.activate_subscription') : trans('messages.renewSubscription')}}
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            @endif
+                            {{-- end whatsapp order --}}
+
+                        </div>
