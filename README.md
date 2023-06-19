@@ -1,0 +1,2 @@
+# easymf
+easymenu test
